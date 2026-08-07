@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 export type UserRole = 'A' | 'B' | 'C' | 'D';
 
@@ -12,6 +12,7 @@ export const rolePriority: Record<UserRole, number> = {
 export interface IUser extends Document {
   userId: string;
   name: string;
+  email: string;
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
@@ -24,11 +25,19 @@ const UserSchema = new Schema<IUser>(
       required: true,
       unique: true,
       trim: true,
+      default: () => new Types.ObjectId().toString(),
     },
     name: {
       type: String,
       required: true,
       trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
     },
     role: {
       type: String,

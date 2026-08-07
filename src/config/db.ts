@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/factorydb';
+dotenv.config();
+const DATABASE_URL = process.env.DATABASE_URL || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/factorydb';
 
 export const connectDatabase = async () => {
-  await mongoose.connect(MONGODB_URI);
+  await mongoose.connect(DATABASE_URL);
   console.log('Connected to MongoDB');
 };
