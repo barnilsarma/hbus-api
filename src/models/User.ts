@@ -16,6 +16,8 @@ export interface IUser extends Document {
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
+  viewaccess?: string[];
+  editaccess?: string[];
 }
 
 const UserSchema = new Schema<IUser>(
@@ -45,6 +47,12 @@ const UserSchema = new Schema<IUser>(
       enum: ['A', 'B', 'C', 'D'],
       default: 'D',
     },
+    viewaccess: {
+      type: [String],
+    },
+    editaccess: {
+      type: [String],
+    }
   },
   {
     timestamps: true,

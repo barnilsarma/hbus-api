@@ -1,5 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
+export type PurchaseStatus = 'INCOMPLETE' | 'DELAYED' | 'COMPLETE';
+
 export interface IPurchase extends Document {
   id: Types.ObjectId;
   PONumber: string;
@@ -10,6 +12,7 @@ export interface IPurchase extends Document {
   rate?: number;
   qty?: number;
   date: Date;
+  status: PurchaseStatus;
   amount?: number;
   invoicenumber?: string;
   invoicedate?: Date;
@@ -55,6 +58,11 @@ const PurchaseSchema = new Schema<IPurchase>(
     date: {
       type: Date,
       default: Date.now,
+    },
+    status: {
+      type: String,
+      enum: ['INCOMPLETE', 'DELAYED', 'COMPLETE'],
+      default: 'INCOMPLETE',
     },
     amount: {
       type: Number,
