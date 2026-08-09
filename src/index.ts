@@ -3,12 +3,12 @@ import dotenv from 'dotenv';
 import { connectDatabase } from './config/db.js';
 import purchaseRoutes from './routes/purchaseRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-
+import cors from 'cors';
 dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-
+app.use(cors({origin: '*'}));
 app.use(express.json());
 
 app.get('/', (_req, res) => {
