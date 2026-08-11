@@ -10,7 +10,6 @@ export const rolePriority: Record<UserRole, number> = {
 };
 
 export interface IUser extends Document {
-  userId: string;
   name: string;
   email: string;
   role: UserRole;
@@ -22,13 +21,6 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema<IUser>(
   {
-    userId: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      default: () => new Types.ObjectId().toString(),
-    },
     name: {
       type: String,
       required: true,
