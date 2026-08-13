@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { connectDatabase } from './config/db.js';
 import purchaseRoutes from './routes/purchaseRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import departmentRoutes from './routes/departmentRoutes.js';
 import cors from 'cors';
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.get('/', (_req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/purchases', purchaseRoutes);
+app.use('/api/departments', departmentRoutes);
 
 const startServer = async () => {
   try {
