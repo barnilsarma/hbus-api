@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  addDepartmentAccess,
   createUser,
   deleteUser,
   getUserById,
@@ -13,6 +14,7 @@ router.get('/', getUsers);
 router.get('/:id', getUserById);
 router.post('/', createUser);
 router.put('/:id', updateUser);
+router.patch('/:id', addDepartmentAccess);
 router.delete('/:id', deleteUser);
 
 export default router;

@@ -15,8 +15,8 @@ export interface IUser extends Document {
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
-  viewaccess: Types.ObjectId[];
-  editaccess: Types.ObjectId[];
+  viewaccess?: string[];
+  editaccess?: string[];
 }
 
 const UserSchema = new Schema<IUser>(
@@ -40,22 +40,10 @@ const UserSchema = new Schema<IUser>(
       default: 'D',
     },
     viewaccess: {
-      type: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: 'Department',
-        },
-      ],
-      default: [],
+      type: [String],
     },
     editaccess: {
-      type: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: 'Department',
-        },
-      ],
-      default: [],
+      type: [String],
     }
   },
   {
