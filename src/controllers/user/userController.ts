@@ -112,3 +112,34 @@ export const deleteUser = async (req: express.Request, res: express.Response) =>
 
   res.status(204).send();
 };
+
+export const revokeDepartmentAccess = async (req: express.Request, res: express.Response) => {
+  const { department, access } = req.body;
+
+  if (typeof department !== 'string' || !department.trim()) {
+    return res.status(400).json({ message: 'department must be a non-empty string' });
+  }
+
+  if (!isValidAccess(access)) {
+    return res.status(400).json({ message: "access must be either 'view' or 'edit'" });
+  }
+
+  const departmentName = department.trim();
+  
+  // Define the $pull query based on the access type being revoked
+  const updateQuery = access === 'view' 
+    ? { $pull: { viewaccess: departmentName, editaccess: departmentName } } // Revoking view also revokes edit
+    : { $pull: { editaccess: departmentName } };                            // Revoking edit only removes edit
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    updateQuery,
+    { new: true, runValidators: true }
+  );
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  res.json(user);
+};
