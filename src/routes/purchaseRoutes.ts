@@ -9,10 +9,17 @@ import {
 
 const router = express.Router();
 
-router.get('/', getPurchases);
-router.get('/:id', getPurchaseById);
-router.post('/', createPurchase);
-router.put('/:id', updatePurchase);
-router.delete('/:id', deletePurchase);
+// Base Path: /api/purchases
+
+router
+  .route('/')
+  .get(getPurchases)
+  .post(createPurchase);
+
+router
+  .route('/:id')
+  .get(getPurchaseById)
+  .put(updatePurchase)
+  .delete(deletePurchase);
 
 export default router;
