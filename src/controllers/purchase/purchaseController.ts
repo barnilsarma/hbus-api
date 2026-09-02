@@ -18,7 +18,7 @@ const syncPurchaseStatus = (purchase: IPurchase) => {
 
 export const getPurchases = async (_req: express.Request, res: express.Response) => {
   try {
-    const purchases = await Purchase.find().populate('location');
+    const purchases = await Purchase.find().populate('location').populate('items');
 
     // Update status directly without causing population save conflicts
     for (const purchase of purchases) {
@@ -42,7 +42,7 @@ export const getPurchases = async (_req: express.Request, res: express.Response)
 
 export const getPurchaseById = async (req: express.Request, res: express.Response) => {
   try {
-    const purchase = await Purchase.findById(req.params.id).populate('location');
+    const purchase = await Purchase.findById(req.params.id).populate('location').populate('items');
 
     if (!purchase) {
       return res.status(404).json({ message: 'Purchase not found' });
@@ -70,15 +70,14 @@ export const createPurchase = async (req: express.Request, res: express.Response
     const {
       PONumber,
       supplier,
-      item,
-      gst,
-      unit,
-      rate,
-      qty,
+      supplierAddress,
+      supplierState,
+      supplierStateCode,
+      gstn,
       locationId,
+      items,
       date,
       status,
-      amount,
       invoicenumber,
       invoicedate,
       receiptdate,
@@ -96,15 +95,14 @@ export const createPurchase = async (req: express.Request, res: express.Response
     const newPurchase = new Purchase({
       PONumber,
       supplier,
-      item,
-      gst,
-      unit,
-      rate,
-      qty,
+      supplierAddress,
+      supplierState,
+      supplierStateCode,
+      gstn,
+      items: items || [],
       location: locationId,
       date,
       status: status ?? 'INCOMPLETE',
-      amount,
       invoicenumber,
       invoicedate,
       receiptdate,
@@ -113,8 +111,8 @@ export const createPurchase = async (req: express.Request, res: express.Response
 
     await newPurchase.save();
 
-    // Populate location details before returning response
-    const populatedPurchase = await newPurchase.populate('location');
+    // Populate location and items details before returning response
+    const populatedPurchase = await newPurchase.populate(['location', 'items']);
     res.status(201).json(populatedPurchase);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
@@ -126,15 +124,14 @@ export const updatePurchase = async (req: express.Request, res: express.Response
     const {
       PONumber,
       supplier,
-      item,
-      gst,
-      unit,
-      rate,
-      qty,
+      supplierAddress,
+      supplierState,
+      supplierStateCode,
+      gstn,
+      items,
       locationId,
       date,
       status,
-      amount,
       invoicenumber,
       invoicedate,
       receiptdate,
@@ -149,16 +146,15 @@ export const updatePurchase = async (req: express.Request, res: express.Response
 
     if (PONumber !== undefined) purchase.PONumber = PONumber;
     if (supplier !== undefined) purchase.supplier = supplier;
-    if (item !== undefined) purchase.item = item;
-    if (gst !== undefined) purchase.gst = gst;
-    if (unit !== undefined) purchase.unit = unit;
-    if (rate !== undefined) purchase.rate = rate;
-    if (qty !== undefined) purchase.qty = qty;
+    if (supplierAddress !== undefined) purchase.supplierAddress = supplierAddress;
+    if (supplierState !== undefined) purchase.supplierState = supplierState;
+    if (supplierStateCode !== undefined) purchase.supplierStateCode = supplierStateCode;  
+    if (gstn !== undefined) purchase.gstn = gstn;
+    if (items !== undefined) purchase.items = items;
     if (locationId !== undefined) purchase.location = locationId;
     if (date !== undefined) purchase.date = date;
     if (status !== undefined) purchase.status = status;
-    if (amount !== undefined) purchase.amount = amount;
-    if (invoicenumber !== undefined) purchase.invoicenumber = invoicedate;
+    if (invoicenumber !== undefined) purchase.invoicenumber = invoicenumber;
     if (invoicedate !== undefined) purchase.invoicedate = invoicedate;
     if (receiptdate !== undefined) purchase.receiptdate = receiptdate;
     if (receivedqty !== undefined) purchase.receivedqty = receivedqty;
@@ -166,7 +162,7 @@ export const updatePurchase = async (req: express.Request, res: express.Response
     syncPurchaseStatus(purchase);
     await purchase.save();
 
-    const populatedPurchase = await purchase.populate('location');
+    const populatedPurchase = await purchase.populate(['location', 'items']);
     res.json(populatedPurchase);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
