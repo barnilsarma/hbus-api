@@ -1,6 +1,9 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { ILocation } from './Location';
-import { IItem } from './Item';
+import './Location';
+import './Item';
+import type { ILocation } from './Location';
+import type { IItem } from './Item';
+
 export type PurchaseStatus = 'INCOMPLETE' | 'DELAYED' | 'COMPLETE';
 
 export interface IPurchase extends Document {
@@ -18,7 +21,7 @@ export interface IPurchase extends Document {
   receiptdate?: string;
   receivedqty?: number;
   location: Types.ObjectId | ILocation;
-  items: IItem[];
+  items: (Types.ObjectId | IItem)[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,8 +60,8 @@ const PurchaseSchema = new Schema<IPurchase>(
     items: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Item'
-      }
+        ref: 'Item',
+      },
     ],
     location: {
       type: Schema.Types.ObjectId,
