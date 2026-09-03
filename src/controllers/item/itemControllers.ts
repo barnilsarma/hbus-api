@@ -1,7 +1,7 @@
-import express from 'express';
-import { Item, type IItem } from '../../models/Item';
+import { Request, Response } from 'express';
+import { Item } from '../../models/Item';
 
-export const getItems = async (_req: express.Request, res: express.Response) => {
+export const getItems = async (_req: Request, res: Response) => {
   try {
     const items = await Item.find();
     res.json(items);
@@ -10,7 +10,7 @@ export const getItems = async (_req: express.Request, res: express.Response) => 
   }
 };
 
-export const getItemById = async (req: express.Request, res: express.Response) => {
+export const getItemById = async (req: Request, res: Response) => {
   try {
     const item = await Item.findById(req.params.id);
 
@@ -24,20 +24,22 @@ export const getItemById = async (req: express.Request, res: express.Response) =
   }
 };
 
-export const createItem = async (req: express.Request, res: express.Response) => {
+export const createItem = async (req: Request, res: Response) => {
   try {
     const { description, gst, unit, rate, qty } = req.body;
 
     if (!description || gst === undefined || !unit || rate === undefined || qty === undefined) {
-      return res.status(400).json({ message: 'All item fields (description, gst, unit, rate, qty) are required' });
+      return res.status(400).json({
+        message: 'All item fields (description, gst, unit, rate, qty) are required',
+      });
     }
 
     const newItem = new Item({
       description,
-      gst,
+      gst: Number(gst),
       unit,
-      rate,
-      qty,
+      rate: Number(rate),
+      qty: Number(qty),
     });
 
     await newItem.save();
@@ -47,7 +49,7 @@ export const createItem = async (req: express.Request, res: express.Response) =>
   }
 };
 
-export const updateItem = async (req: express.Request, res: express.Response) => {
+export const updateItem = async (req: Request, res: Response) => {
   try {
     const { description, gst, unit, rate, qty } = req.body;
 
@@ -58,10 +60,10 @@ export const updateItem = async (req: express.Request, res: express.Response) =>
     }
 
     if (description !== undefined) item.description = description;
-    if (gst !== undefined) item.gst = gst;
+    if (gst !== undefined) item.gst = Number(gst);
     if (unit !== undefined) item.unit = unit;
-    if (rate !== undefined) item.rate = rate;
-    if (qty !== undefined) item.qty = qty;
+    if (rate !== undefined) item.rate = Number(rate);
+    if (qty !== undefined) item.qty = Number(qty);
 
     await item.save();
     res.json(item);
@@ -70,7 +72,7 @@ export const updateItem = async (req: express.Request, res: express.Response) =>
   }
 };
 
-export const deleteItem = async (req: express.Request, res: express.Response) => {
+export const deleteItem = async (req: Request, res: Response) => {
   try {
     const item = await Item.findByIdAndDelete(req.params.id);
 
