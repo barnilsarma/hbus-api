@@ -1,8 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { connectDatabase } from './config/db.js';
-import purchaseRoutes from './routes/purchaseRoutes.js';
-import userRoutes from './routes/userRoutes.js';
+import { connectDatabase } from './config/db';
+import purchaseRoutes from './routes/purchaseRoutes';
+import userRoutes from './routes/userRoutes';
+import locationRoutes from './routes/locationRoutes';
+import itemRoutes from './routes/itemRoutes';
 import cors from 'cors';
 dotenv.config();
 
@@ -17,10 +19,10 @@ app.get('/', (_req, res) => {
     message: 'Factory Management API is running.'
   });
 });
-
+app.use('/api/items', itemRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/purchases', purchaseRoutes);
-
+app.use('/api/location',locationRoutes);
 const startServer = async () => {
   try {
     await connectDatabase();

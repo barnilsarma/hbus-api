@@ -1,138 +1,181 @@
 import express from 'express';
 import { Purchase, type IPurchase } from '../../models/Purchase';
 
-const syncPurchaseStatus = (purchase: IPurchase) => {
-  if (purchase.status === 'COMPLETE') {
-    return;
+// Helper to compute status safely without crashing on invalid dates
+const calculateStatus = (purchaseDateRaw: any, currentStatus: string): string => {
+  if (currentStatus === 'COMPLETE') return 'COMPLETE';
+
+  const purchaseDate = purchaseDateRaw ? new Date(purchaseDateRaw) : new Date();
+  const time = purchaseDate.getTime();
+
+  if (Number.isNaN(time)) {
+    return currentStatus || 'INCOMPLETE';
   }
 
-  const purchaseDate = purchase.date ? new Date(purchase.date) : new Date();
-  const diffInDays = Math.floor((Date.now() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffInDays >= 15) {
-    purchase.status = 'DELAYED';
-  } else if (!purchase.status) {
-    purchase.status = 'INCOMPLETE';
-  }
+  const diffInDays = Math.floor((Date.now() - time) / (1000 * 60 * 60 * 24));
+  return diffInDays >= 15 ? 'DELAYED' : currentStatus || 'INCOMPLETE';
 };
 
 export const getPurchases = async (_req: express.Request, res: express.Response) => {
-  const purchases = await Purchase.find();
+  try {
+    const purchases = await Purchase.find().populate('location').populate('items');
 
-  for (const purchase of purchases) {
-    syncPurchaseStatus(purchase);
-    await purchase.save();
+    // Update out-of-sync statuses safely
+    const updates = purchases.map(async (purchase) => {
+      const updatedStatus = calculateStatus(purchase.date, purchase.status);
+      if (updatedStatus !== purchase.status) {
+        purchase.status = updatedStatus as any;
+        await Purchase.updateOne({ _id: purchase._id }, { status: updatedStatus });
+      }
+    });
+
+    await Promise.allSettled(updates);
+
+    res.json(purchases);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || 'Error fetching purchases' });
   }
-
-  res.json(purchases);
 };
 
 export const getPurchaseById = async (req: express.Request, res: express.Response) => {
-  const purchase = await Purchase.findById(req.params.id);
+  try {
+    const purchase = await Purchase.findById(req.params.id).populate('location').populate('items');
 
-  if (!purchase) {
-    return res.status(404).json({ message: 'Purchase not found' });
+    if (!purchase) {
+      return res.status(404).json({ message: 'Purchase not found' });
+    }
+
+    const updatedStatus = calculateStatus(purchase.date, purchase.status);
+    if (updatedStatus !== purchase.status) {
+      purchase.status = updatedStatus as any;
+      await Purchase.updateOne({ _id: purchase._id }, { status: updatedStatus });
+    }
+
+    res.json(purchase);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || 'Error fetching purchase' });
   }
-
-  syncPurchaseStatus(purchase);
-  await purchase.save();
-
-  res.json(purchase);
 };
 
 export const createPurchase = async (req: express.Request, res: express.Response) => {
-  const {
-    PONumber,
-    supplier,
-    item,
-    gst,
-    unit,
-    rate,
-    qty,
-    date,
-    status,
-    amount,
-    invoicenumber,
-    invoicedate,
-    receiptdate,
-    receivedqty,
-  } = req.body;
+  try {
+    const {
+      PONumber,
+      supplier,
+      supplierAddress,
+      supplierState,
+      supplierStateCode,
+      gstn,
+      locationId,
+      location, // Accept both location and locationId from req.body
+      items,
+      date,
+      status,
+      invoicenumber,
+      invoicedate,
+      receiptdate,
+      receivedqty,
+    } = req.body;
 
-  if (!PONumber) {
-    return res.status(400).json({ message: 'PONumber is required' });
+    const targetLocation = locationId || location;
+
+    if (!PONumber) {
+      return res.status(400).json({ message: 'PONumber is required' });
+    }
+
+    if (!targetLocation) {
+      return res.status(400).json({ message: 'location or locationId is required' });
+    }
+
+    const newPurchase = new Purchase({
+      PONumber,
+      supplier,
+      supplierAddress,
+      supplierState,
+      supplierStateCode,
+      gstn,
+      items: items || [],
+      location: targetLocation,
+      date: date || new Date(),
+      status: status ?? 'INCOMPLETE',
+      invoicenumber,
+      invoicedate,
+      receiptdate,
+      receivedqty,
+    });
+
+    await newPurchase.save();
+
+    const populatedPurchase = await newPurchase.populate(['location', 'items']);
+    res.status(201).json(populatedPurchase);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message || 'Failed to create purchase' });
   }
-
-  const newPurchase = new Purchase({
-    PONumber,
-    supplier,
-    item,
-    gst,
-    unit,
-    rate,
-    qty,
-    date,
-    status: status ?? 'INCOMPLETE',
-    amount,
-    invoicenumber,
-    invoicedate,
-    receiptdate,
-    receivedqty,
-  });
-
-  await newPurchase.save();
-  res.status(201).json(newPurchase);
 };
 
 export const updatePurchase = async (req: express.Request, res: express.Response) => {
-  const {
-    PONumber,
-    supplier,
-    item,
-    gst,
-    unit,
-    rate,
-    qty,
-    date,
-    status,
-    amount,
-    invoicenumber,
-    invoicedate,
-    receiptdate,
-    receivedqty,
-  } = req.body;
+  try {
+    const {
+      PONumber,
+      supplier,
+      supplierAddress,
+      supplierState,
+      supplierStateCode,
+      gstn,
+      items,
+      locationId,
+      location,
+      date,
+      status,
+      invoicenumber,
+      invoicedate,
+      receiptdate,
+      receivedqty,
+    } = req.body;
 
-  const purchase = await Purchase.findById(req.params.id);
+    const purchase = await Purchase.findById(req.params.id);
 
-  if (!purchase) {
-    return res.status(404).json({ message: 'Purchase not found' });
+    if (!purchase) {
+      return res.status(404).json({ message: 'Purchase not found' });
+    }
+
+    const targetLocation = locationId || location;
+
+    if (PONumber !== undefined) purchase.PONumber = PONumber;
+    if (supplier !== undefined) purchase.supplier = supplier;
+    if (supplierAddress !== undefined) purchase.supplierAddress = supplierAddress;
+    if (supplierState !== undefined) purchase.supplierState = supplierState;
+    if (supplierStateCode !== undefined) purchase.supplierStateCode = supplierStateCode;  
+    if (gstn !== undefined) purchase.gstn = gstn;
+    if (items !== undefined) purchase.items = items;
+    if (targetLocation !== undefined) purchase.location = targetLocation;
+    if (date !== undefined) purchase.date = date;
+    if (status !== undefined) purchase.status = status;
+    if (invoicenumber !== undefined) purchase.invoicenumber = invoicenumber;
+    if (invoicedate !== undefined) purchase.invoicedate = invoicedate;
+    if (receiptdate !== undefined) purchase.receiptdate = receiptdate;
+    if (receivedqty !== undefined) purchase.receivedqty = receivedqty;
+
+    purchase.status = calculateStatus(purchase.date, purchase.status) as any;
+    await purchase.save();
+
+    const populatedPurchase = await purchase.populate(['location', 'items']);
+    res.json(populatedPurchase);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message || 'Failed to update purchase' });
   }
-
-  if (PONumber !== undefined) purchase.PONumber = PONumber;
-  if (supplier !== undefined) purchase.supplier = supplier;
-  if (item !== undefined) purchase.item = item;
-  if (gst !== undefined) purchase.gst = gst;
-  if (unit !== undefined) purchase.unit = unit;
-  if (rate !== undefined) purchase.rate = rate;
-  if (qty !== undefined) purchase.qty = qty;
-  if (date !== undefined) purchase.date = date;
-  if (status !== undefined) purchase.status = status;
-  if (amount !== undefined) purchase.amount = amount;
-  if (invoicenumber !== undefined) purchase.invoicenumber = invoicenumber;
-  if (invoicedate !== undefined) purchase.invoicedate = invoicedate;
-  if (receiptdate !== undefined) purchase.receiptdate = receiptdate;
-  if (receivedqty !== undefined) purchase.receivedqty = receivedqty;
-
-  syncPurchaseStatus(purchase);
-  await purchase.save();
-  res.json(purchase);
 };
 
 export const deletePurchase = async (req: express.Request, res: express.Response) => {
-  const purchase = await Purchase.findByIdAndDelete(req.params.id);
+  try {
+    const purchase = await Purchase.findByIdAndDelete(req.params.id);
 
-  if (!purchase) {
-    return res.status(404).json({ message: 'Purchase not found' });
+    if (!purchase) {
+      return res.status(404).json({ message: 'Purchase not found' });
+    }
+
+    res.status(204).send();
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || 'Failed to delete purchase' });
   }
-
-  res.status(204).send();
 };
