@@ -5,6 +5,8 @@ import {
   createItem,
   updateItem,
   deleteItem,
+  getItemByMCode,
+  getItemsByLocation
 } from '../controllers/item/itemControllers';
 
 const router = Router();
@@ -16,7 +18,8 @@ router.get('/', getItems);
 // @route   GET /api/items/:id
 // @desc    Get single item by ID
 router.get('/:id', getItemById);
-
+router.get('/mcode/:mcode', getItemByMCode);
+router.get('/location/:locationId', getItemsByLocation);
 // @route   POST /api/items
 // @desc    Create a new item
 router.post('/', createItem);
