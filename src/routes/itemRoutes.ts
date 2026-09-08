@@ -6,7 +6,8 @@ import {
   updateItem,
   deleteItem,
   getItemByMCode,
-  getItemsByLocation
+  getItemsByLocation,
+  updateReceivedQty
 } from '../controllers/item/itemControllers';
 
 const router = Router();
@@ -27,6 +28,7 @@ router.post('/', createItem);
 // @route   PUT /api/items/:id
 // @desc    Update an existing item by ID
 router.put('/:id', updateItem);
+router.put('/receivedqty/:id', updateReceivedQty);
 
 // @route   DELETE /api/items/:id
 // @desc    Delete an item by ID

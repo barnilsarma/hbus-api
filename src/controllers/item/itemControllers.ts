@@ -63,7 +63,9 @@ export const createItem = async (req: Request, res: Response) => {
       rate: Number(rate),
       qty: Number(qty) || 0,
       newQty: Number(newQty) || 0,
-      location: location || locationID // Fallback to handle both key names
+      location: location || locationID,
+      receivedqtyNew: 0,
+      receivedqtyOriginal: 0
     });
 
     await newItem.save();
@@ -74,7 +76,7 @@ export const createItem = async (req: Request, res: Response) => {
 };
 export const updateItem = async (req: Request, res: Response) => {
   try {
-    const { description, gst, unit, rate, qty,location } = req.body;
+    const { description, gst, unit, rate, qty,location, receivedqtyNew } = req.body;
 
     const item = await Item.findById(req.params.id);
 
@@ -88,6 +90,34 @@ export const updateItem = async (req: Request, res: Response) => {
     if (rate !== undefined) item.rate = Number(rate);
     if (qty !== undefined) item.qty = Number(qty);
     if (location !== undefined) item.location = location;
+    if (receivedqtyNew !== undefined) item.receivedqtyNew = Number(receivedqtyNew);
+    await item.save();
+    res.json(item);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const updateReceivedQty = async (req: Request, res: Response) => {
+  try {
+    const { receivedqtyNew } = req.body;
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    if(receivedqtyNew === undefined) {
+      return res.status(400).json({ message: 'receivedqtyNew is required' });
+    }
+    if(receivedqtyNew < 0) {
+      return res.status(400).json({ message: 'receivedqtyNew cannot be negative' });
+    }
+    if(receivedqtyNew > item.newQty) {
+      return res.status(400).json({ message: 'Received Quantity cannot be greater than Newly placed order' });
+    }
+    item.receivedqtyOriginal = item.receivedqtyNew ?? 0;
+    item.receivedqtyNew = Number(receivedqtyNew);
+    item.qty =item.qty + item.receivedqtyNew-item.receivedqtyOriginal;
     await item.save();
     res.json(item);
   } catch (error: any) {

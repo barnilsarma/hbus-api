@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import {ILocation} from './Location';
+import { ILocation } from './Location';
 export interface IItem extends Document {
     mcode: string;
     description: string;
@@ -8,16 +8,18 @@ export interface IItem extends Document {
     rate: number;
     qty: number;
     newQty: number;
+    receivedqtyOriginal?: number;
+    receivedqtyNew?: number;
     location: ILocation;
 }
 
 const ItemSchema = new Schema<IItem>(
-    {   
-        mcode:{
-            type:String,
-            required:true,
-            trim:true,
-            unique:true
+    {
+        mcode: {
+            type: String,
+            required: true,
+            trim: true,
+            unique: true
         },
         description: {
             type: String,
@@ -41,11 +43,19 @@ const ItemSchema = new Schema<IItem>(
             type: Number,
             default: 0,
         },
-        newQty:{
+        newQty: {
             type: Number,
             default: 0
         },
-        location:{
+        receivedqtyOriginal: {
+            type: Number,
+            default: 0
+        },
+        receivedqtyNew: {
+            type: Number,
+            default: 0
+        },
+        location: {
             type: Schema.Types.ObjectId,
             ref: 'Location'
         }
