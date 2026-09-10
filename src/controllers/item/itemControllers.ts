@@ -76,7 +76,7 @@ export const createItem = async (req: Request, res: Response) => {
 };
 export const updateItem = async (req: Request, res: Response) => {
   try {
-    const { description, gst, unit, rate, qty,location, receivedqtyNew } = req.body;
+    const { description, gst, unit, rate, qty,newQty,location, receivedqtyNew } = req.body;
 
     const item = await Item.findById(req.params.id);
 
@@ -90,6 +90,7 @@ export const updateItem = async (req: Request, res: Response) => {
     if (rate !== undefined) item.rate = Number(rate);
     if (qty !== undefined) item.qty = Number(qty);
     if (location !== undefined) item.location = location;
+    if (newQty !== undefined) item.newQty = Number(newQty);
     if (receivedqtyNew !== undefined) item.receivedqtyNew = Number(receivedqtyNew);
     await item.save();
     res.json(item);
