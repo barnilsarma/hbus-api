@@ -1,6 +1,9 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import { ILocation } from './Location';
+export type ItemType = 'PRIMARY' | 'SECONDARY';
+
 export interface IItem extends Document {
+    type: ItemType;
     mcode: string;
     description: string;
     gst: number;
@@ -15,6 +18,11 @@ export interface IItem extends Document {
 
 const ItemSchema = new Schema<IItem>(
     {
+        type: {
+            type: String,
+            enum: ['PRIMARY', 'SECONDARY'],
+            required: true,
+        },
         mcode: {
             type: String,
             required: true,

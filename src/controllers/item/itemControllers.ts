@@ -47,15 +47,16 @@ export const getItemsByLocation=async(req: Request, res: Response)=>{
 
 export const createItem = async (req: Request, res: Response) => {
   try {
-    const { mcode, description, gst, unit, rate, qty, newQty, location, locationID } = req.body;
+    const { type, mcode, description, gst, unit, rate, qty, newQty, location, locationID } = req.body;
 
-    if (!mcode || !description || gst === undefined || !unit || rate === undefined || qty === undefined) {
+    if (!type || !mcode || !description || gst === undefined || !unit || rate === undefined || qty === undefined) {
       return res.status(400).json({
-        message: 'All item fields (mcode, description, gst, unit, rate, qty) are required',
+        message: 'All item fields (type, mcode, description, gst, unit, rate, qty) are required',
       });
     }
 
     const newItem = new Item({
+      type,
       mcode,  
       description,
       gst: Number(gst),
@@ -76,7 +77,7 @@ export const createItem = async (req: Request, res: Response) => {
 };
 export const updateItem = async (req: Request, res: Response) => {
   try {
-    const { description, gst, unit, rate, qty,newQty,location, receivedqtyNew } = req.body;
+    const { type, description, gst, unit, rate, qty,newQty,location, receivedqtyNew } = req.body;
 
     const item = await Item.findById(req.params.id);
 
@@ -84,6 +85,7 @@ export const updateItem = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Item not found' });
     }
 
+    if (type !== undefined) item.type = type;
     if (description !== undefined) item.description = description;
     if (gst !== undefined) item.gst = Number(gst);
     if (unit !== undefined) item.unit = unit;
