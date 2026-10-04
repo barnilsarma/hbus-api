@@ -44,7 +44,7 @@ const PrimarySchema = new Schema<IPrimary>(
     ]
 },
 {
-    timestamps: true // Automatically manages createdAt and updatedAt
+    timestamps: true
 }
 );  
 
