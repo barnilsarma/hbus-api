@@ -5,6 +5,8 @@ import purchaseRoutes from './routes/purchaseRoutes';
 import userRoutes from './routes/userRoutes';
 import locationRoutes from './routes/locationRoutes';
 import itemRoutes from './routes/itemRoutes';
+import rawMaterialRoutes from './routes/rawMaterialRoutes';
+import primaryRoutes from './routes/primaryRoutes';
 import cors from 'cors';
 dotenv.config();
 
@@ -23,6 +25,9 @@ app.use('/api/items', itemRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/location',locationRoutes);
+app.use('/api/rawmaterials', rawMaterialRoutes);
+app.use('/api/primaries', primaryRoutes);
+
 const startServer = async () => {
   try {
     await connectDatabase();
