@@ -7,6 +7,8 @@ export interface IRawMaterial extends Document {
     ordered:number;
     stock:number;
     location: ILocation;
+    gst: number;
+    rate: number;
 }
 
 
@@ -37,6 +39,14 @@ const RawMaterialSchema = new Schema<IRawMaterial>(
       type: Schema.Types.ObjectId,
       ref: 'Location',
       required: [true, 'Location is required']
+    },
+    gst: {
+      type: Number,
+      default: 0
+    },
+    rate: {
+      type: Number,
+      default: 0
     }
   },
   {

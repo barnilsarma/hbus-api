@@ -49,7 +49,7 @@ export const getRawMaterialsByLocation = async (req: Request, res: Response) => 
 
 export const createRawMaterial = async (req: Request, res: Response) => {
   try {
-    const { mcode, name, ordered, stock, location, locationId } = req.body;
+    const { mcode, name, ordered, stock, location, locationId, gst, rate } = req.body;
     const targetLocation = location || locationId;
 
     if (!mcode || !name || !targetLocation) {
@@ -64,6 +64,8 @@ export const createRawMaterial = async (req: Request, res: Response) => {
       ordered: ordered === undefined ? 0 : Number(ordered),
       stock: stock === undefined ? 0 : Number(stock),
       location: targetLocation,
+      gst: gst === undefined ? 0 : Number(gst),
+      rate: rate === undefined ? 0 : Number(rate),
     });
 
     await rawMaterial.save();
@@ -75,7 +77,7 @@ export const createRawMaterial = async (req: Request, res: Response) => {
 
 export const updateRawMaterial = async (req: Request, res: Response) => {
   try {
-    const { mcode, name, ordered, stock, location, locationId } = req.body;
+    const { mcode, name, ordered, stock, location, locationId, gst, rate } = req.body;
     const rawMaterial = await RawMaterial.findById(req.params.id);
 
     if (!rawMaterial) {
@@ -86,6 +88,8 @@ export const updateRawMaterial = async (req: Request, res: Response) => {
     if (name !== undefined) rawMaterial.name = name;
     if (ordered !== undefined) rawMaterial.ordered = Number(ordered);
     if (stock !== undefined) rawMaterial.stock = Number(stock);
+    if (gst !== undefined) rawMaterial.gst = Number(gst);
+    if (rate !== undefined) rawMaterial.rate = Number(rate);
     if (location !== undefined || locationId !== undefined) {
       rawMaterial.location = location || locationId;
     }
