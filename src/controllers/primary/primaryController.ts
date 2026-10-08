@@ -1,9 +1,33 @@
 import { Request, Response } from 'express';
 import { Primary } from '../../models/Primary';
 
+const validateRawMaterials = (rawMaterials: unknown) => {
+  if (!Array.isArray(rawMaterials)) {
+    throw new Error('rawMaterials must be an array of { name, units } entries');
+  }
+
+  return rawMaterials.map((rawMaterial, index) => {
+    if (
+      rawMaterial === null ||
+      typeof rawMaterial !== 'object' ||
+      !('name' in rawMaterial) ||
+      rawMaterial.name === undefined ||
+      rawMaterial.name === null ||
+      !('units' in rawMaterial) ||
+      typeof rawMaterial.units !== 'number' ||
+      !Number.isFinite(rawMaterial.units) ||
+      rawMaterial.units < 0
+    ) {
+      throw new Error(`rawMaterials[${index}] must include a raw material name and non-negative numeric units`);
+    }
+
+    return { name: rawMaterial.name, units: rawMaterial.units };
+  });
+};
+
 export const getPrimaries = async (_req: Request, res: Response) => {
   try {
-    const primaries = await Primary.find().populate('location').populate('rawMaterials');
+    const primaries = await Primary.find().populate('location').populate('rawMaterials.name');
     res.json(primaries);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -12,7 +36,7 @@ export const getPrimaries = async (_req: Request, res: Response) => {
 
 export const getPrimaryById = async (req: Request, res: Response) => {
   try {
-    const primary = await Primary.findById(req.params.id).populate('location').populate('rawMaterials');
+    const primary = await Primary.findById(req.params.id).populate('location').populate('rawMaterials.name');
 
     if (!primary) {
       return res.status(404).json({ message: 'Primary not found' });
@@ -28,7 +52,7 @@ export const getPrimariesByLocation = async (req: Request, res: Response) => {
   try {
     const primaries = await Primary.find({ location: req.params.locationId })
       .populate('location')
-      .populate('rawMaterials');
+      .populate('rawMaterials.name');
     res.json(primaries);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -50,11 +74,11 @@ export const createPrimary = async (req: Request, res: Response) => {
       repairing: repairing === undefined ? 0 : Number(repairing),
       defective: defective === undefined ? 0 : Number(defective),
       location: targetLocation,
-      rawMaterials: rawMaterials || [],
+      rawMaterials: rawMaterials === undefined ? [] : validateRawMaterials(rawMaterials),
     });
 
     await primary.save();
-    await primary.populate(['location', 'rawMaterials']);
+    await primary.populate(['location', 'rawMaterials.name']);
     res.status(201).json(primary);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
@@ -77,10 +101,10 @@ export const updatePrimary = async (req: Request, res: Response) => {
     if (location !== undefined || locationId !== undefined) {
       primary.location = location || locationId;
     }
-    if (rawMaterials !== undefined) primary.rawMaterials = rawMaterials;
+    if (rawMaterials !== undefined) primary.rawMaterials = validateRawMaterials(rawMaterials);
 
     await primary.save();
-    await primary.populate(['location', 'rawMaterials']);
+    await primary.populate(['location', 'rawMaterials.name']);
     res.json(primary);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
