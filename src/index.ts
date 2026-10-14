@@ -8,6 +8,7 @@ import locationRoutes from './routes/locationRoutes';
 import itemRoutes from './routes/itemRoutes';
 import rawMaterialRoutes from './routes/rawMaterialRoutes';
 import primaryRoutes from './routes/primaryRoutes';
+import dispatchRoutes from './routes/dispatchRoutes';
 import cors from 'cors';
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/raw-material-pos', rawMaterialPORoutes);
 app.use('/api/location',locationRoutes);
 app.use('/api/rawmaterials', rawMaterialRoutes);
 app.use('/api/primaries', primaryRoutes);
+app.use('/api/dispatches', dispatchRoutes);
 
 const startServer = async () => {
   try {
