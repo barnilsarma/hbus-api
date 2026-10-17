@@ -1,11 +1,21 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import { ILocation } from './Location';
+import { IItem } from './Item';
+
+export interface IDispatchAccessory {
+    item: Types.ObjectId | IItem;
+    quantity: number;
+}
+
 export interface IDispatch extends Document {
     challanNo: string;
     invoiceNo?: string;
     dateOfDelivery: Date;
     type:string;
     description: string;
+    item?: Types.ObjectId | IItem;
+    quantity?: number;
+    HSNCode?: string;
     new?:string;
     REP?:string;
     DTRSerialNo?:string;
@@ -15,7 +25,24 @@ export interface IDispatch extends Document {
     partyName?:string;
     destination?:string;
     location: ILocation;
+    accessories?: IDispatchAccessory[];
 }
+
+const DispatchAccessorySchema = new Schema<IDispatchAccessory>(
+    {
+        item: {
+            type: Schema.Types.ObjectId,
+            ref: 'Item',
+            required: true,
+        },
+        quantity: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+    },
+    { _id: false }
+);
 
 const DispatchSchema = new Schema<IDispatch>(
     {
@@ -33,8 +60,6 @@ const DispatchSchema = new Schema<IDispatch>(
             type: String,
             required: false,
             trim: true,
-            unique: true,
-            sparse: true,
         },
         dateOfDelivery: {
             type: Date,
@@ -43,6 +68,20 @@ const DispatchSchema = new Schema<IDispatch>(
         description: {
             type: String,
             required: true,
+            trim: true,
+        },
+        item: {
+            type: Schema.Types.ObjectId,
+            ref: 'Item',
+        },
+        quantity: {
+            type: Number,
+            required: false,
+            min: 0,
+        },
+        HSNCode: {
+            type: String,
+            required: false,
             trim: true,
         },
         new: {
@@ -87,10 +126,12 @@ const DispatchSchema = new Schema<IDispatch>(
         location: {
             type: Schema.Types.ObjectId,
             ref: 'Location'
-        }
+        },
+        accessories: [DispatchAccessorySchema],
     },
     {
         timestamps: true,
+        optimisticConcurrency: true,
     }
 );
 

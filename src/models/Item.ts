@@ -14,6 +14,7 @@ export interface IItem extends Document {
     receivedqtyOriginal?: number;
     receivedqtyNew?: number;
     location: ILocation;
+    dispatched?: number;
 }
 
 const ItemSchema = new Schema<IItem>(
@@ -66,6 +67,10 @@ const ItemSchema = new Schema<IItem>(
         location: {
             type: Schema.Types.ObjectId,
             ref: 'Location'
+        },
+        dispatched: {
+            type: Number,
+            default: 0
         }
     },
     {
