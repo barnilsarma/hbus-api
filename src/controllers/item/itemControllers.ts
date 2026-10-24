@@ -47,7 +47,19 @@ export const getItemsByLocation=async(req: Request, res: Response)=>{
 
 export const createItem = async (req: Request, res: Response) => {
   try {
-    const { type, mcode, description, gst, unit, rate, qty, newQty, location, locationID } = req.body;
+    const {
+      type,
+      mcode,
+      description,
+      gst,
+      unit,
+      rate,
+      qty,
+      newQty,
+      qty_in_job,
+      location,
+      locationID,
+    } = req.body;
 
     if (!type || !mcode || !description || gst === undefined || !unit || rate === undefined || qty === undefined) {
       return res.status(400).json({
@@ -64,6 +76,7 @@ export const createItem = async (req: Request, res: Response) => {
       rate: Number(rate),
       qty: Number(qty) || 0,
       newQty: Number(newQty) || 0,
+      ...(qty_in_job !== undefined ? { qty_in_job: Number(qty_in_job) } : {}),
       location: location || locationID,
       receivedqtyNew: 0,
       receivedqtyOriginal: 0
@@ -77,7 +90,18 @@ export const createItem = async (req: Request, res: Response) => {
 };
 export const updateItem = async (req: Request, res: Response) => {
   try {
-    const { type, description, gst, unit, rate, qty,newQty,location, receivedqtyNew } = req.body;
+    const {
+      type,
+      description,
+      gst,
+      unit,
+      rate,
+      qty,
+      newQty,
+      qty_in_job,
+      location,
+      receivedqtyNew,
+    } = req.body;
 
     const item = await Item.findById(req.params.id);
 
@@ -93,6 +117,7 @@ export const updateItem = async (req: Request, res: Response) => {
     if (qty !== undefined) item.qty = Number(qty);
     if (location !== undefined) item.location = location;
     if (newQty !== undefined) item.newQty = Number(newQty);
+    if (qty_in_job !== undefined) item.qty_in_job = Number(qty_in_job);
     if (receivedqtyNew !== undefined) item.receivedqtyNew = Number(receivedqtyNew);
     await item.save();
     res.json(item);

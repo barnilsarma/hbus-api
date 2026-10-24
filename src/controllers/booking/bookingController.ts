@@ -5,7 +5,8 @@ import { BookingModel } from '../../models/Booking';
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : 'An unexpected error occurred';
 
-const isValidId = (id: string): boolean => Types.ObjectId.isValid(id);
+const isValidId = (id: unknown): id is string =>
+  typeof id === 'string' && Types.ObjectId.isValid(id);
 
 export const getBookings = async (_req: Request, res: Response) => {
   try {
@@ -17,12 +18,13 @@ export const getBookings = async (_req: Request, res: Response) => {
 };
 
 export const getBookingById = async (req: Request, res: Response) => {
-  if (!isValidId(req.params.id)) {
+  const { id } = req.params;
+  if (!isValidId(id)) {
     return res.status(400).json({ message: 'Invalid booking ID' });
   }
 
   try {
-    const booking = await BookingModel.findById(req.params.id).populate('location');
+    const booking = await BookingModel.findById(id).populate('location');
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
@@ -70,12 +72,13 @@ export const createBooking = async (req: Request, res: Response) => {
 };
 
 export const updateBooking = async (req: Request, res: Response) => {
-  if (!isValidId(req.params.id)) {
+  const { id } = req.params;
+  if (!isValidId(id)) {
     return res.status(400).json({ message: 'Invalid booking ID' });
   }
 
   try {
-    const booking = await BookingModel.findById(req.params.id);
+    const booking = await BookingModel.findById(id);
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
@@ -122,12 +125,13 @@ export const updateBooking = async (req: Request, res: Response) => {
 };
 
 export const deleteBooking = async (req: Request, res: Response) => {
-  if (!isValidId(req.params.id)) {
+  const { id } = req.params;
+  if (!isValidId(id)) {
     return res.status(400).json({ message: 'Invalid booking ID' });
   }
 
   try {
-    const booking = await BookingModel.findByIdAndDelete(req.params.id);
+    const booking = await BookingModel.findByIdAndDelete(id);
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });

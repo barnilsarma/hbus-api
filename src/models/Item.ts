@@ -11,6 +11,7 @@ export interface IItem extends Document {
     rate: number;
     qty: number;
     newQty: number;
+    qty_in_job?: number;
     receivedqtyOriginal?: number;
     receivedqtyNew?: number;
     location: ILocation;
@@ -55,6 +56,9 @@ const ItemSchema = new Schema<IItem>(
         newQty: {
             type: Number,
             default: 0
+        },
+        qty_in_job: {
+            type: Number,
         },
         receivedqtyOriginal: {
             type: Number,
