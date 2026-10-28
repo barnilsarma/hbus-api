@@ -5,6 +5,7 @@ import {
   getPurchaseById,
   getPurchases,
   updatePurchase,
+  removeItemFromPurchase
 } from '../controllers/purchase/purchaseController';
 
 const router = express.Router();
@@ -22,4 +23,7 @@ router
   .put(updatePurchase)
   .delete(deletePurchase);
 
+
+// routes/purchaseRoutes.ts
+router.delete('/:id/items/:itemId', removeItemFromPurchase);
 export default router;

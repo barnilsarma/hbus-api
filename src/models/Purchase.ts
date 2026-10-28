@@ -19,7 +19,6 @@ export interface IPurchase extends Document {
   invoicenumber?: string;
   invoicedate?: Date;
   receiptdate?: string;
-  receivedqty?: number;
   location: Types.ObjectId | ILocation;
   items: (Types.ObjectId | IItem)[];
   createdAt: Date;
@@ -87,9 +86,6 @@ const PurchaseSchema = new Schema<IPurchase>(
     receiptdate: {
       type: String,
       trim: true,
-    },
-    receivedqty: {
-      type: Number,
     },
   },
   {

@@ -1,15 +1,36 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { ILocation } from './Location';
+export type ItemType = 'PRIMARY' | 'SECONDARY';
 
 export interface IItem extends Document {
+    type: ItemType;
+    mcode: string;
     description: string;
     gst: number;
     unit: string;
     rate: number;
     qty: number;
+    newQty: number;
+    qty_in_job?: number;
+    receivedqtyOriginal?: number;
+    receivedqtyNew?: number;
+    location: ILocation;
+    dispatched?: number;
 }
 
 const ItemSchema = new Schema<IItem>(
     {
+        type: {
+            type: String,
+            enum: ['PRIMARY', 'SECONDARY'],
+            required: true,
+        },
+        mcode: {
+            type: String,
+            required: true,
+            trim: true,
+            unique: true
+        },
         description: {
             type: String,
             required: true,
@@ -30,8 +51,31 @@ const ItemSchema = new Schema<IItem>(
         },
         qty: {
             type: Number,
-            required: true,
+            default: 0,
         },
+        newQty: {
+            type: Number,
+            default: 0
+        },
+        qty_in_job: {
+            type: Number,
+        },
+        receivedqtyOriginal: {
+            type: Number,
+            default: 0
+        },
+        receivedqtyNew: {
+            type: Number,
+            default: 0
+        },
+        location: {
+            type: Schema.Types.ObjectId,
+            ref: 'Location'
+        },
+        dispatched: {
+            type: Number,
+            default: 0
+        }
     },
     {
         timestamps: true,

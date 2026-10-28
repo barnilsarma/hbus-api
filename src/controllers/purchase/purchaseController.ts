@@ -1,4 +1,5 @@
 import express from 'express';
+import { Types } from 'mongoose';
 import { Purchase, type IPurchase } from '../../models/Purchase';
 
 // Helper to compute status safely without crashing on invalid dates
@@ -73,8 +74,7 @@ export const createPurchase = async (req: express.Request, res: express.Response
       status,
       invoicenumber,
       invoicedate,
-      receiptdate,
-      receivedqty,
+      receiptdate
     } = req.body;
 
     const targetLocation = locationId || location;
@@ -100,8 +100,7 @@ export const createPurchase = async (req: express.Request, res: express.Response
       status: status ?? 'INCOMPLETE',
       invoicenumber,
       invoicedate,
-      receiptdate,
-      receivedqty,
+      receiptdate
     });
 
     await newPurchase.save();
@@ -129,8 +128,7 @@ export const updatePurchase = async (req: express.Request, res: express.Response
       status,
       invoicenumber,
       invoicedate,
-      receiptdate,
-      receivedqty,
+      receiptdate
     } = req.body;
 
     const purchase = await Purchase.findById(req.params.id);
@@ -154,7 +152,6 @@ export const updatePurchase = async (req: express.Request, res: express.Response
     if (invoicenumber !== undefined) purchase.invoicenumber = invoicenumber;
     if (invoicedate !== undefined) purchase.invoicedate = invoicedate;
     if (receiptdate !== undefined) purchase.receiptdate = receiptdate;
-    if (receivedqty !== undefined) purchase.receivedqty = receivedqty;
 
     purchase.status = calculateStatus(purchase.date, purchase.status) as any;
     await purchase.save();
@@ -166,6 +163,39 @@ export const updatePurchase = async (req: express.Request, res: express.Response
   }
 };
 
+
+// controllers/purchaseController.ts
+
+export const removeItemFromPurchase = async (req: express.Request, res: express.Response) => {
+  try {
+    const { id, itemId } = req.params;
+    const purchaseId = typeof id === 'string' ? id : undefined;
+    const purchaseItemId = typeof itemId === 'string' ? itemId : undefined;
+
+    if (
+      !purchaseId ||
+      !purchaseItemId ||
+      !Types.ObjectId.isValid(purchaseId) ||
+      !Types.ObjectId.isValid(purchaseItemId)
+    ) {
+      return res.status(400).json({ message: 'Invalid purchase or item ID' });
+    }
+
+    const updatedPurchase = await Purchase.findByIdAndUpdate(
+      purchaseId,
+      { $pull: { items: purchaseItemId } },
+      { new: true }
+    ).populate(['location']);
+
+    if (!updatedPurchase) {
+      return res.status(404).json({ message: 'Purchase Order not found' });
+    }
+
+    res.json(updatedPurchase);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || 'Failed to remove item from purchase' });
+  }
+};
 export const deletePurchase = async (req: express.Request, res: express.Response) => {
   try {
     const purchase = await Purchase.findByIdAndDelete(req.params.id);

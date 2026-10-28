@@ -5,6 +5,9 @@ import {
   createItem,
   updateItem,
   deleteItem,
+  getItemByMCode,
+  getItemsByLocation,
+  updateReceivedQty
 } from '../controllers/item/itemControllers';
 
 const router = Router();
@@ -16,7 +19,8 @@ router.get('/', getItems);
 // @route   GET /api/items/:id
 // @desc    Get single item by ID
 router.get('/:id', getItemById);
-
+router.get('/mcode/:mcode', getItemByMCode);
+router.get('/location/:locationId', getItemsByLocation);
 // @route   POST /api/items
 // @desc    Create a new item
 router.post('/', createItem);
@@ -24,6 +28,7 @@ router.post('/', createItem);
 // @route   PUT /api/items/:id
 // @desc    Update an existing item by ID
 router.put('/:id', updateItem);
+router.put('/receivedqty/:id', updateReceivedQty);
 
 // @route   DELETE /api/items/:id
 // @desc    Delete an item by ID
