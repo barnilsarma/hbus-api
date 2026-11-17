@@ -2,12 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/db';
 import purchaseRoutes from './routes/purchaseRoutes';
-import rawMaterialPORoutes from './routes/rawMaterialPORoutes';
 import userRoutes from './routes/userRoutes';
 import locationRoutes from './routes/locationRoutes';
 import itemRoutes from './routes/itemRoutes';
-import rawMaterialRoutes from './routes/rawMaterialRoutes';
-import primaryRoutes from './routes/primaryRoutes';
 import dispatchRoutes from './routes/dispatchRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import cors from 'cors';
@@ -27,10 +24,7 @@ app.get('/', (_req, res) => {
 app.use('/api/items', itemRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/purchases', purchaseRoutes);
-app.use('/api/raw-material-pos', rawMaterialPORoutes);
 app.use('/api/location',locationRoutes);
-app.use('/api/rawmaterials', rawMaterialRoutes);
-app.use('/api/primaries', primaryRoutes);
 app.use('/api/dispatches', dispatchRoutes);
 app.use('/api/bookings', bookingRoutes);
 

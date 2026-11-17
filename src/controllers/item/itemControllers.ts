@@ -51,6 +51,7 @@ export const createItem = async (req: Request, res: Response) => {
       type,
       mcode,
       description,
+      invoiceNumber,
       gst,
       unit,
       rate,
@@ -71,6 +72,7 @@ export const createItem = async (req: Request, res: Response) => {
       type,
       mcode,  
       description,
+      ...(typeof invoiceNumber === 'string' ? { invoiceNumber: invoiceNumber.trim() } : {}),
       gst: Number(gst),
       unit,
       rate: Number(rate),
@@ -93,6 +95,7 @@ export const updateItem = async (req: Request, res: Response) => {
     const {
       type,
       description,
+      invoiceNumber,
       gst,
       unit,
       rate,
@@ -111,6 +114,9 @@ export const updateItem = async (req: Request, res: Response) => {
 
     if (type !== undefined) item.type = type;
     if (description !== undefined) item.description = description;
+    if (invoiceNumber !== undefined) {
+      item.invoiceNumber = invoiceNumber === null ? undefined : String(invoiceNumber).trim();
+    }
     if (gst !== undefined) item.gst = Number(gst);
     if (unit !== undefined) item.unit = unit;
     if (rate !== undefined) item.rate = Number(rate);
