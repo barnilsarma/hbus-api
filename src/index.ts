@@ -7,6 +7,7 @@ import locationRoutes from './routes/locationRoutes';
 import itemRoutes from './routes/itemRoutes';
 import dispatchRoutes from './routes/dispatchRoutes';
 import bookingRoutes from './routes/bookingRoutes';
+import stockRoutes from './routes/stockRoutes';
 import cors from 'cors';
 dotenv.config();
 
@@ -27,6 +28,8 @@ app.use('/api/purchases', purchaseRoutes);
 app.use('/api/location',locationRoutes);
 app.use('/api/dispatches', dispatchRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/stock', stockRoutes);
+app.use('/api', stockRoutes);
 
 const startServer = async () => {
   try {

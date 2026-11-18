@@ -26,6 +26,14 @@ export interface IDispatch extends Document {
     destination?:string;
     location: ILocation;
     accessories?: IDispatchAccessory[];
+    trwrprintstatus?: string;
+    NEW2?: string;
+    REP2?: string;
+    remarks2?: string;
+    receivingcopystatus?: string;
+    purchaseorderno2?: string;
+    purchaseorderdate2?: Date;
+    qty2?: number;
 }
 
 const DispatchAccessorySchema = new Schema<IDispatchAccessory>(
@@ -128,6 +136,14 @@ const DispatchSchema = new Schema<IDispatch>(
             ref: 'Location'
         },
         accessories: [DispatchAccessorySchema],
+        trwrprintstatus: { type: String, trim: true },
+        NEW2: { type: String, trim: true },
+        REP2: { type: String, trim: true },
+        remarks2: { type: String, trim: true },
+        receivingcopystatus: { type: String, trim: true },
+        purchaseorderno2: { type: String, trim: true },
+        purchaseorderdate2: { type: Date },
+        qty2: { type: Number, min: 0 },
     },
     {
         timestamps: true,

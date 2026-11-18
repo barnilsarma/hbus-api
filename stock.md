@@ -357,3 +357,18 @@
 - purchaseorderno2(string,optional)
 - purchaseorderdate2(date,optional)
 - qty2(number,optional)
+
+
+#### Keypoints
+- There are two types of models based on types of attribute: Totally Derived model and Non Derived model.
+- The ones which have one or more attributes having a default value calculated by a mathematical operation on attributes of other models, are called Totally Derived models.
+- The ones which don't have such mathematically calculated attribute, are called Non Derived models.
+- The attributes which don't follow any mathematical calcualation will have their data through POST request body.
+- While creation of a record, if the model is a Totally Derived one, then first of all the mathematical expression will be checked for any dependencies on other models to avoid any inconsistencies.
+- The Non Derived models are independent of any other model hence the records can be made freely without any constraint.
+
+#### Requirements
+- Make the mentioned models following the definitions in the `models` folder.
+- Make the corresponding CRUD controllers for all the models accordingly.
+- Finally make the routes too following the proper convention.
+- Make an md based api documentation for frontend integration.
