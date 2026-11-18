@@ -154,10 +154,20 @@
 
     $qty \times invoicerate$
 - billamount(number,unique:false)
-- POqty(number,unique:false)
-- POrate(number,unique:false)
-- received(number,unique:false)
-- remaining(number,unique:false)
+- POqty(number,unique:false)=
+
+    Sum up `qty` from all the records of `InvoicePO` model where `POnumber`==`Invoice`->`purchaseno`
+
+- POrate(number,unique:false)=
+
+    Sum up `rate` from all the records of `InvoicePO` model where `POnumber`==`Invoice`->`purchaseno`
+- received(number,unique:false)=
+
+    Sum up the `qty` from all the records of `Invoice` model where the particular `purchaseno` value is repeated.
+
+- remaining(number,unique:false)=
+
+    Sum up `InvoicePO`->`qty` where `InvoicePO`->`POnumber`==`Invoice`->`purchaseno`
 - remarks(string,unique:false)
 
 # InvoicePO model
@@ -169,18 +179,28 @@
 - qty(number,unique:false)
 - unit(string,unique:false)
 - rate(number,unique:false)
-- total(number,unique:false)
-- totalamount(number,unique:false)
-- received(number,unique:false)
-- remaining(number,unique:false)
+- total(number,unique:false)=
+
+    $qty \times rate$
+- totalamountPO(number,unique:false)
+- received(number,unique:false)=
+
+    Sum up all the `qty` value from the records of `Invoice` model where `Invoice`->`purchaseno`==`InvoicePO`->`POnumber`
+- remaining(number,unique:false)=
+
+    `received`-`sum of all the qty records of the InvoicePO model where POnumber value of the particular record is repeated` 
 - remarks(string,unique:false,optional)
 
 # RejectionStock model
 - kva(string,unique:false)
-- core(number,unique:false)
-- lvConductor(number,unique:false)
-- hvConductor(number,unique:false)
-- oil(number,unique:false)
+- core(number,unique:false)=
+    Sum up `RejectionEntry`->`coreRejectionKG` where `RejectionStock`->`kva`=`RejectionEntry`->`kva`
+- lvConductor(number,unique:false)=
+    Sum up `RejectionEntry`->`lvConductorRejectionKG` where `RejectionStock`->`kva`=`RejectionEntry`->`kva`
+- hvConductor(number,unique:false)=
+    Sum up `RejectionEntry`->`hvConductorRejectionKG` where `RejectionStock`->`kva`=`RejectionEntry`->`kva`
+- oil(number,unique:false)=
+    Sum up `RejectionEntry`->`oilRejectionLtr` where `RejectionStock`->`kva`=`RejectionEntry`->`kva`
 
 # RejectionEntry model
 - timestamp(datetime,unique:false)
@@ -195,14 +215,14 @@
 
 # DailyProdReportStock model
 - kva(string,unique:false)
-- tankPaintDone(number,unique:false)
-- coreAssembly(number,unique:false)
-- lvCoil(number,unique:false)
-- hvCoil(number,unique:false)
-- coilAssembly(number,unique:false)
-- boxup(number,unique:false)
-- testingDone(number,unique:false)
-- tankOnlyFabrication(number,unique:false)
+- tankPaintDone(number,unique:false)=Import `DailyProd`->`paint` values from records where `DailyProd`->`kva`==`kva` and sumup
+- coreAssembly(number,unique:false)=Import `DailyProd`->`coreAssemblyDone` values from records where `DailyProd`->`kva`==`kva` and sumup
+- lvCoil(number,unique:false)=Import `DailyProd`->`lvCoilWinding` values from records where `DailyProd`->`kva`==`kva` and sumup
+- hvCoil(number,unique:false)=Import `DailyProd`->`hvCoilWinding` values from records where `DailyProd`->`kva`==`kva` and sumup
+- coilAssembly(number,unique:false)=Import `DailyProd`->`coilAssembly` values from records where `DailyProd`->`kva`==`kva` and sumup
+- boxup(number,unique:false)=Import `DailyProd`->`boxupDone` values from records where `DailyProd`->`kva`==`kva` and sumup
+- testingDone(number,unique:false)=Import `DailyProd`->`testingDone` values from records where `DailyProd`->`kva`==`kva` and sumup
+- tankOnlyFabrication(number,unique:false)=Sum up the `DailyProd`->`tank` values where `DailyProd`->`kva`==`kva` 
 
 # DailyProd model
 - timestamp(datetime(now))
@@ -256,14 +276,52 @@
 
 # ProductionFlor model
 - kva(string,unique:false)
-- tank(number,unique:false)
-- coreAssemblyStock(number,unique:false)
-- lvCoilStock(number,unique:false)
-- hvCoilStock(number,unique:false)
-- coilAssembly(number,unique:false)
-- boxup(number,unique:false)
-- rtd(number,unique:false)
-- tankOnlyFabrication(number,unique:false)
+- tank(number,unique:false):
+    
+    $T_1$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `tankPaintDone` and sumup
+
+    $T_2$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `boxup` and sumup
+
+    final expression=$T_1-T_2$
+- coreAssemblyStock(number,unique:false):
+    
+    $T_1$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `coreAssembly` and sumup
+
+    $T_2$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `coilAssembly` and sumup
+
+    final expression=$T_1-T_2$
+- lvCoilStock(number,unique:false):
+
+    $T_1$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `lvCoil` and sumup
+
+    $T_2$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `coilAssembly` and sumup
+
+    final expression=$T_1-T_2$
+- hvCoilStock(number,unique:false):
+
+    $T_1$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `hvCoil` and sumup
+
+    $T_2$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `coilAssembly` and sumup
+
+    final expression=$T_1-T_2$
+- coilAssembly(number,unique:false):
+
+    $T_1$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `coilAssembly` and sumup
+
+    $T_2$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `boxup` and sumup
+
+    final expression=$T_1-T_2$
+- boxup(number,unique:false):
+
+    $T_1$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `boxup` and sumup
+
+    $T_2$=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `testingDone` and sumup
+
+    final expression=$T_1-T_2$
+- rtd(number,unique:false)=Match the `kva` of `ProductionFlor` and `DailyProdReportStock` and fetch its `testingDone` and sumup
+- tankOnlyFabrication(number,unique:false)=
+
+    `Sum of DailyProdReportStock->tankOnlyFabrication where kva matches the ProductionFlor->kva`-    `Sum of DailyProdReportStock->tankPaintDone where kva matches the ProductionFlor->kva`
 
 # RepairingData model
 - timestamp(datetime(now))
@@ -292,8 +350,8 @@
 ## Note: There is already a Dispatch model in this workspace. Just add the following optional attributes to it. Rest Everything remains same.
 
 - trwrprintstatus(string,optional)
-- new2(string,optional)
-- rep2(string,optional)
+- NEW2(string,optional)
+- REP2(string,optional)
 - remarks2(string,optional)
 - receivingcopystatus(string,optional)
 - purchaseorderno2(string,optional)
