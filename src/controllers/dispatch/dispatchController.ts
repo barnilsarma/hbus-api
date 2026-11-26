@@ -286,6 +286,14 @@ export const createDispatch = async (req: Request, res: Response) => {
       destination,
       location,
       locationId,
+      trwrprintstatus,
+      NEW2,
+      REP2,
+      remarks2,
+      receivingcopystatus,
+      purchaseorderno2,
+      purchaseorderdate2,
+      qty2,
     } = req.body;
     const targetLocation = locationId ?? location;
     const itemReference = item ?? itemId ?? mcode;
@@ -327,6 +335,14 @@ export const createDispatch = async (req: Request, res: Response) => {
       partyName,
       destination,
       location: targetLocation,
+      trwrprintstatus,
+      NEW2,
+      REP2,
+      remarks2,
+      receivingcopystatus,
+      purchaseorderno2,
+      purchaseorderdate2,
+      qty2: qty2 === undefined ? undefined : Number(qty2),
     });
 
     rollbackStock = await applyStockDeltas(
@@ -374,6 +390,14 @@ export const updateDispatch = async (req: Request, res: Response) => {
       destination,
       location,
       locationId,
+      trwrprintstatus,
+      NEW2,
+      REP2,
+      remarks2,
+      receivingcopystatus,
+      purchaseorderno2,
+      purchaseorderdate2,
+      qty2,
     } = body;
 
     const itemReference = body.item ?? body.itemId ?? body.mcode;
@@ -417,6 +441,14 @@ export const updateDispatch = async (req: Request, res: Response) => {
     if (vehicleDetails !== undefined) dispatch.vehicleDetails = vehicleDetails as string;
     if (partyName !== undefined) dispatch.partyName = partyName as string;
     if (destination !== undefined) dispatch.destination = destination as string;
+    if (trwrprintstatus !== undefined) dispatch.trwrprintstatus = trwrprintstatus as string;
+    if (NEW2 !== undefined) dispatch.NEW2 = NEW2 as string;
+    if (REP2 !== undefined) dispatch.REP2 = REP2 as string;
+    if (remarks2 !== undefined) dispatch.remarks2 = remarks2 as string;
+    if (receivingcopystatus !== undefined) dispatch.receivingcopystatus = receivingcopystatus as string;
+    if (purchaseorderno2 !== undefined) dispatch.purchaseorderno2 = purchaseorderno2 as string;
+    if (purchaseorderdate2 !== undefined) dispatch.purchaseorderdate2 = purchaseorderdate2 as Date;
+    if (qty2 !== undefined) dispatch.qty2 = Number(qty2);
     if (location !== undefined || locationId !== undefined) {
       dispatch.location = (locationId ?? location) as IDispatch['location'];
     }

@@ -6,6 +6,7 @@ export interface IItem extends Document {
     type: ItemType;
     mcode: string;
     description: string;
+    invoiceNumber?: string;
     gst: number;
     unit: string;
     rate: number;
@@ -30,6 +31,11 @@ const ItemSchema = new Schema<IItem>(
             required: true,
             trim: true,
             unique: true
+        },
+        invoiceNumber: {
+            type: String,
+            trim: true,
+            required: false
         },
         description: {
             type: String,
